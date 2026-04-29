@@ -6,6 +6,8 @@
 - src/ — исходные файлы проекта
 - src/components/ — папка с JS компонентами
 - src/components/base/ — папка с базовым кодом
+- src/components/models/ — папка с моделями данных
+- src/components/api/ — папка с классом для работы с сервером
 
 Важные файлы:
 - index.html — HTML-файл главной страницы
@@ -127,7 +129,7 @@ type TPayment = 'card' | 'cash';
 
 ```typescript
 interface IBuyer {
-  payment: TPayment;  // Способ оплаты ('card' | 'cash';)
+  payment: TPayment | null;  // Способ оплаты ('card' | 'cash';)
   email: string;      // Email покупателя
   phone: string;      // Телефон покупателя
   address: string;   // Адрес доставки
@@ -166,7 +168,7 @@ interface IBuyer {
 Методы класса:
 - getItems(): IProduct[] — возвращает массив товаров, находящихся в корзине.
 - addItem(item: IProduct): void — добавляет товар в массив корзины.
-- removeItem(item: IProduct): void — удаляет товар из массива корзины.
+- removeItem(id: string): void — удаляет товар из массива корзины по его идентификатору.
 - clear(): void — очищает корзину (удаляет все товары).
 - getTotal(): number — возвращает общую стоимость всех товаров в корзине.
 - getCount(): number — возвращает количество товаров в корзине.
@@ -189,7 +191,7 @@ interface IBuyer {
 - setAddress(address: string): void — сохраняет адрес доставки.
 - setEmail(email: string): void — сохраняет email покупателя.
 - setPhone(phone: string): void — сохраняет телефон покупателя.
-- getData(): IBuyer — возвращает объект со всеми данными покупателя.
+- getData(): IBuyer | null — возвращает объект с данными покупателя или null, если способ оплаты не выбран.
 - clear(): void — очищает все данные покупателя.
 - validate(): IValidationErrors — выполняет валидацию данных покупателя. Возвращает объект с ошибками, где ключ — название поля, значение — текст ошибки. Если ошибок нет, возвращает пустой объект.
 
@@ -221,11 +223,7 @@ interface IProductListResponse {
 Описывает данные заказа, отправляемые на сервер.
 
 ```typescript
-interface IOrderRequest {
-    payment: TPayment;
-    email: string;
-    phone: string;
-    address: string;
+interface IOrderRequest extends IBuyer {
     total: number;
     items: string[];
 }
