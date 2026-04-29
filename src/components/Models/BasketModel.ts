@@ -1,4 +1,4 @@
-import { IProduct } from "../../../types";
+import { IProduct } from "../../types";
 
 export class BasketModel {
     protected _items: IProduct[] = [];
@@ -11,8 +11,8 @@ export class BasketModel {
         this._items.push(item);
     }
 
-    removeItem(item: IProduct): void {
-        this._items = this._items.filter(i => i.id !== item.id);
+    removeItem(id: string): void {
+        this._items = this._items.filter(item => item.id !== id);
     }
 
     clear(): void {

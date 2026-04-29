@@ -17,29 +17,20 @@ export interface IProduct {
 }
 
 export interface IBuyer {
-    payment: TPayment;
+    payment: TPayment | null;
     email: string;
     phone: string;
     address: string;
 }
 
-export interface IValidationErrors {
-    payment?: string;
-    email?: string;
-    phone?: string;
-    address?: string;
-}
+export type IValidationErrors = Partial<Record<keyof IBuyer, string>>;
 
 export interface IProductListResponse {
     total: number;
     items: IProduct[];
 }
 
-export interface IOrderRequest {
-    payment: TPayment;
-    email: string;
-    phone: string;
-    address: string;
+export interface IOrderRequest extends IBuyer{
     total: number;
     items: string[];
 }

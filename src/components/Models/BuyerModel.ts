@@ -1,7 +1,7 @@
-import { IBuyer, IValidationErrors, TPayment } from "../../../types";
+import { IBuyer, IValidationErrors, TPayment } from "../../types";
 
 export class BuyerModel {
-    protected _payment: TPayment | '' = '';
+    protected _payment: TPayment | null = null;
     protected _address = '';
     protected _email = '';
     protected _phone = '';
@@ -22,9 +22,12 @@ export class BuyerModel {
         this._phone = phone;
     }
 
-    getData(): IBuyer {
+    getData(): IBuyer | null {
+        if (!this._payment) {
+            return null;
+        }
         return {
-            payment: this._payment as TPayment,
+            payment: this._payment,
             email: this._email,
             address: this._address,
             phone: this._phone
@@ -32,7 +35,7 @@ export class BuyerModel {
     }
 
     clear(): void {
-        this._payment = '';
+        this._payment = null;
         this._address = '';
         this._email = '';
         this._phone = '';

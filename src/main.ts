@@ -1,9 +1,9 @@
 import './scss/styles.scss';
 import { apiProducts } from './utils/data';
-import { CatalogModel } from './components/base/Models/CatalogModel';
-import { BasketModel } from './components/base/Models/BasketModel';
-import { BuyerModel } from './components/base/Models/BuyerModel';
-import { LarekApi } from './components/base/LarekApi';
+import { CatalogModel } from './components/Models/CatalogModel';
+import { BasketModel } from './components/Models/BasketModel';
+import { BuyerModel } from './components/Models/BuyerModel';
+import { LarekApi } from './components/api/LarekApi';
 import { Api } from './components/base/Api';
 import { API_URL } from './utils/constants';
 
@@ -25,7 +25,7 @@ console.log('Количество:', basket.getCount());
 console.log('Сумма:', basket.getTotal());
 console.log('Товар в корзине:', basket.hasItem('854cef69-976d-4c2a-a18c-2aa45046c390'));
 
-basket.removeItem(apiProducts.items[0]);
+basket.removeItem(apiProducts.items[0].id);
 console.log('После удаления:', basket.getItems());
 
 basket.clear();
@@ -36,7 +36,11 @@ buyer.setPayment('card');
 buyer.setAddress('ул. Пушкина');
 buyer.setEmail('test@test.ru');
 buyer.setPhone('+79991234567');
-console.log('Данные покупателя:', buyer.getData());
+
+const buyerData = buyer.getData();
+if (buyerData) {
+    console.log('Данные покупателя:', buyerData);
+}
 console.log('Ошибки валидации:', buyer.validate());
 
 buyer.clear();
