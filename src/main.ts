@@ -10,12 +10,17 @@ import { API_URL } from './utils/constants';
 const catalog = new CatalogModel();
 const basket = new BasketModel();
 const buyer = new BuyerModel();
-const api = new LarekApi(new Api(API_URL));
+const baseApi = new Api(API_URL);
+const api = new LarekApi(baseApi);
 
 // --- Тестирование CatalogModel ---
 catalog.setItems(apiProducts.items);
 console.log('Каталог (мок):', catalog.getItems());
 console.log('Товар по id:', catalog.getItem('854cef69-976d-4c2a-a18c-2aa45046c390'));
+
+catalog.setPreview(catalog.getItem('854cef69-976d-4c2a-a18c-2aa45046c390') ?? null);
+console.log('Превью товара:', catalog.getPreview());
+
 
 // --- Тестирование BasketModel ---
 basket.addItem(apiProducts.items[0]);
@@ -37,10 +42,7 @@ buyer.setAddress('ул. Пушкина');
 buyer.setEmail('test@test.ru');
 buyer.setPhone('+79991234567');
 
-const buyerData = buyer.getData();
-if (buyerData) {
-    console.log('Данные покупателя:', buyerData);
-}
+console.log('Данные покупателя:', buyer.getData());
 console.log('Ошибки валидации:', buyer.validate());
 
 buyer.clear();

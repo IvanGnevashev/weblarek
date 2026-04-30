@@ -135,6 +135,11 @@ interface IBuyer {
   address: string;   // Адрес доставки
 }
 ```
+### Тип IValidationErrors
+Тип для ошибок валидации покупателя. Ключи соответствуют полям `IBuyer`, значения — строки с текстом ошибки.
+
+```typescript
+type IValidationErrors = Partial<Record<keyof IBuyer, string>>;
 
 ## Модели данных
 Классы, отвечающие за хранение и работу с данными приложения.
@@ -181,7 +186,7 @@ interface IBuyer {
 Конструктор класса не принимает параметров.
 
 Поля класса:
-- _payment: TPayment | '' — способ оплаты.
+- _payment: TPayment | null — способ оплаты.
 - _address: string — адрес доставки.
 - _email: string — адрес электронной почты.
 - _phone: string — номер телефона.
@@ -191,7 +196,7 @@ interface IBuyer {
 - setAddress(address: string): void — сохраняет адрес доставки.
 - setEmail(email: string): void — сохраняет email покупателя.
 - setPhone(phone: string): void — сохраняет телефон покупателя.
-- getData(): IBuyer | null — возвращает объект с данными покупателя или null, если способ оплаты не выбран.
+- getData(): IBuyer — возвращает объект со всеми данными покупателя.
 - clear(): void — очищает все данные покупателя.
 - validate(): IValidationErrors — выполняет валидацию данных покупателя. Возвращает объект с ошибками, где ключ — название поля, значение — текст ошибки. Если ошибок нет, возвращает пустой объект.
 

@@ -22,10 +22,7 @@ export class BuyerModel {
         this._phone = phone;
     }
 
-    getData(): IBuyer | null {
-        if (!this._payment) {
-            return null;
-        }
+    getData(): IBuyer {
         return {
             payment: this._payment,
             email: this._email,
