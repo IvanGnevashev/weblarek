@@ -243,3 +243,234 @@ interface IOrderResponse {
     total: number;
 }
 ```
+
+## Слой представления
+Все классы представления отвечают за отображение данных и генерацию событий о действиях пользователя. Каждый класс получает в конструктор экземпляр `EventEmitter` для генерации событий. Данные в классах представления не хранятся — они передаются через метод `render()`.
+
+### Базовые классы
+
+#### Класс Card
+Базовый класс для всех карточек товара. Наследует `Component`.
+
+**Конструктор:**  
+`constructor(container: HTMLElement, events: IEvents)` — принимает DOM-элемент модального окна (#modal-container) и брокер событий.
+
+**Поля класса:**
+- `_title: HTMLElement` — название товара.
+- `_price: HTMLElement` — цена товара.
+
+**Методы класса:**
+- `set price(value: number | null): void` — устанавливает цену. Если `null`, выводит «Бесценно».
+- `set title(value: string): void` — устанавливает название товара.
+
+---
+
+#### Класс Form
+Базовый класс для форм оформления заказа. Наследует `Component`.
+
+**Конструктор:**  
+`constructor(container: HTMLElement, onInputChange: (...) => void, onSubmit: () => void)` — принимает DOM-элемент формы и экземпляр брокера событий.
+
+**Поля класса:**
+- `_submit: HTMLButtonElement` — кнопка отправки.
+- `_errors: HTMLElement` — блок для вывода ошибок.
+
+**Методы класса:**
+- `set valid(value: boolean): void` — разблокирует или блокирует кнопку отправки.
+- `set errors(value: string): void` — выводит текст ошибок.
+- `onInputChange(): void` — генерирует событие `form:change` при изменении полей.
+
+---
+
+### Компоненты
+
+#### Класс Modal
+Отвечает за отображение модального окна. Не имеет наследников. Наследует `Component`.
+
+**Конструктор:**  
+`constructor(container: HTMLElement, onClose: () => void)` — принимает DOM-элемент модального окна и экземпляр брокера событий.
+
+**Поля класса:**
+- `_close: HTMLButtonElement` — кнопка закрытия.
+- `_content: HTMLElement` — контейнер для контента.
+
+**Методы класса:**
+- `open(): void` — открывает модальное окно.
+- `close(): void` — закрывает модальное окно.
+- `render(data: { content: HTMLElement }): HTMLElement` — вставляет контент и открывает окно.
+
+**События:**
+- `modal:close` — при клике на крестик или вне окна.
+
+---
+
+#### Класс CardCatalog
+Отвечает за отображение карточки товара в каталоге. Наследует `Card`.
+
+**Конструктор:**  
+`constructor(container: HTMLElement, onCardSelect: () => void)` — принимает DOM-элемент карточки и экземпляр брокера событий.
+
+**Поля класса:**
+- `_image: HTMLImageElement` — изображение товара.
+- `_category: HTMLElement` — категория товара.
+
+**Методы класса:**
+- `set category(value: string): void` — устанавливает категорию и соответствующий CSS-класс.
+- `set image(value: string): void` — устанавливает URL изображения.
+
+**События:**
+- `card:select` — при клике на карточку. В данных события передаётся объект с `id` товара.
+
+---
+
+#### Класс CardPreview
+Отвечает за отображение карточки товара в модальном окне. Наследует `Card`.
+
+**Конструктор:**  
+`constructor(container: HTMLElement, onAction: () => void)` — принимает DOM-элемент карточки и экземпляр брокера событий.
+
+**Поля класса:**
+- `_button: HTMLButtonElement` — кнопка «Купить» / «Удалить из корзины».
+- `_description: HTMLElement` — описание товара.
+- `_image: HTMLImageElement` — изображение товара.
+- `_category: HTMLElement` — категория товара.
+
+**Методы класса:**
+- `set button(value: 'buy' | 'remove' | 'disabled'): void` — меняет текст и состояние кнопки.
+- `set category(value: string): void` — устанавливает категорию и соответствующий CSS-класс.
+- `set image(value: string): void` — устанавливает URL изображения.
+
+**События:**
+- `product:buy` — при нажатии на кнопку «Купить».
+- `product:remove` — при нажатии на кнопку «Удалить из корзины».
+
+---
+
+#### Класс CardBasket
+Отвечает за отображение карточки товара в корзине. Наследует `Card`.
+
+**Конструктор:**  
+`constructor(container: HTMLElement, onOrderClick: () => void)` — принимает DOM-элемент карточки и экземпляр брокера событий.
+
+**Поля класса:**
+- `_index: HTMLElement` — порядковый номер товара.
+- `_delete: HTMLButtonElement` — кнопка удаления.
+
+**События:**
+- `product:remove` — при нажатии на кнопку удаления.
+
+---
+
+#### Класс Basket
+Отвечает за отображение корзины. Наследует `Component`.
+
+**Конструктор:**  
+`constructor(container: HTMLElement, events: EventEmitter)` — принимает DOM-элемент корзины и экземпляр брокера событий.
+
+**Поля класса:**
+- `_list: HTMLElement` — контейнер для списка товаров.
+- `_total: HTMLElement` — элемент с общей стоимостью.
+- `_button: HTMLButtonElement` — кнопка «Оформить».
+
+**Методы класса:**
+- `set items(value: HTMLElement[]): void` — заполняет список товаров.
+- `set total(value: number): void` — устанавливает общую стоимость.
+
+**События:**
+- `order:open` — при нажатии на кнопку «Оформить».
+
+---
+
+#### Класс FormOrder
+Отвечает за первый шаг оформления заказа. Наследует `Form`.
+
+**Конструктор:**  
+`constructor(container: HTMLElement, events: EventEmitter)` — принимает DOM-элемент формы и экземпляр брокера событий.
+
+**Поля класса:**
+- `_paymentButtons: HTMLButtonElement[]` — кнопки выбора способа оплаты.
+- `_address: HTMLInputElement` — поле ввода адреса.
+
+**События:**
+- `order:submit` — при нажатии кнопки «Далее».
+- `form:change` — при изменении способа оплаты или адреса.
+
+---
+
+#### Класс FormContacts
+Отвечает за второй шаг оформления заказа. Наследует `Form`.
+
+**Конструктор:**  
+`constructor(container: HTMLElement, events: EventEmitter)` — принимает DOM-элемент формы и экземпляр брокера событий.
+
+**Поля класса:**
+- `_email: HTMLInputElement` — поле ввода email.
+- `_phone: HTMLInputElement` — поле ввода телефона.
+
+**События:**
+- `contacts:submit` — при нажатии кнопки «Оплатить».
+- `form:change` — при изменении полей.
+
+---
+
+#### Класс Success
+Отвечает за отображение сообщения об успешной оплате. Наследует `Component`.
+
+**Конструктор:**  
+`constructor(container: HTMLElement, events: EventEmitter)` — принимает DOM-элемент и экземпляр брокера событий.
+
+**Поля класса:**
+- `_total: HTMLElement` — элемент с суммой заказа.
+- `_close: HTMLButtonElement` — кнопка закрытия.
+
+**События:**
+- `modal:close` — при нажатии на кнопку «За новыми покупками!».
+
+---
+
+#### Класс Page
+Отвечает за главную страницу. Наследует `Component`.
+
+**Конструктор:**  
+`constructor(container: HTMLElement, events: EventEmitter)` — принимает DOM-элемент страницы и экземпляр брокера событий.
+
+**Поля класса:**
+- `_gallery: HTMLElement` — контейнер каталога.
+- `_counter: HTMLElement` — счётчик товаров в корзине.
+- `_basket: HTMLButtonElement` — кнопка открытия корзины.
+
+**Методы класса:**
+- `set catalog(value: HTMLElement[]): void` — отображает карточки каталога.
+- `set counter(value: number): void` — обновляет счётчик корзины.
+
+**События:**
+- `basket:open` — при клике на иконку корзины.
+
+---
+
+## События
+
+События, генерируемые в приложении, и их обработка Презентером.
+
+### События Представления
+
+| Событие | Компонент | Данные | Когда |
+|---------|-----------|--------|-------|
+| `card:select` | `CardCatalog` | `{ id: string }` | Клик по карточке |
+| `product:buy` | `CardPreview` | `{ id: string }` | Нажатие «Купить» |
+| `product:remove` | `CardPreview`, `CardBasket` | `{ id: string }` | Нажатие «Удалить» |
+| `basket:open` | `Page` | — | Клик по иконке корзины |
+| `order:open` | `Basket` | — | Нажатие «Оформить» |
+| `order:submit` | `FormOrder` | — | Нажатие «Далее» |
+| `contacts:submit` | `FormContacts` | — | Нажатие «Оплатить» |
+| `form:change` | `FormOrder`, `FormContacts` | `{ field, value }` | Изменение поля |
+| `modal:close` | `Modal`, `Success` | — | Закрытие окна |
+
+### События Моделей данных
+
+| Событие | Модель | Данные | Когда |
+|---------|--------|--------|-------|
+| `catalog:changed` | `CatalogModel` | `IProduct[]` | Изменение каталога |
+| `preview:changed` | `CatalogModel` | `IProduct \| null` | Изменение товара для просмотра |
+| `basket:changed` | `BasketModel` | `IProduct[]` | Изменение содержимого корзины |
+| `buyer:changed` | `BuyerModel` | `IBuyer` | Изменение данных покупателя |
