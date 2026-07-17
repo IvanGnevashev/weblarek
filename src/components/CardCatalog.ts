@@ -1,11 +1,11 @@
 import {Card, ICard} from "./Card"
 
-interface ICardCatalog extends ICard {
+export interface ICardCatalog extends ICard {
     image: string;
     category: string;
 }
 
-class CardCatalog extends Card {
+export class CardCatalog extends Card {
     protected _image: HTMLImageElement;
     protected _category: HTMLElement;
 
