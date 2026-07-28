@@ -6,6 +6,7 @@ import { Modal } from './components/Modal';
 import { CardPreview } from './components/CardPreview';
 import { IProduct } from './types/index';
 import { Basket } from './components/Basket';
+import { FormOrder } from './components/FormOrder';
 
 import { CatalogModel } from './components/Models/CatalogModel';
 import { BasketModel } from './components/Models/BasketModel';
@@ -28,16 +29,24 @@ const api = new LarekApi(baseApi);
 const page = new Page(
     ensureElement('.page__wrapper'),
     () => {
-        const items = basketModel.getItems();
-        const basketContainer = cloneTemplate('#basket');
-        
-        const cards = items.map( (product, index) => {
+        openBasket();
+    }
+);
+
+function openBasket() {
+    const items = basketModel.getItems();
+    const basketContainer = cloneTemplate('#basket')
+
+    const cards = items.map( (product, index) => {
             const container = cloneTemplate('#card-basket');
 
             const card = new CardBasket(
                 container,
                 () => {
+                    basketModel.removeItem(product.id);
 
+                    openBasket();
+                    updatePage();
                 }
             )
 
@@ -47,23 +56,54 @@ const page = new Page(
             });
         })
 
-        const basket = new Basket(
+    const basket = new Basket(
             basketContainer,
             () => {
-                
-            }
-        )
+                const orderContainer = cloneTemplate('#order');
 
-        const renderBasket = basket.render({
+                const order = new FormOrder(
+                    orderContainer,
+                    (field, value) => {
+                        if (field === 'address') {
+                            buyerModel.setAddress(value);
+                        }
+
+                        const errors = buyerModel.validate();
+                        const data = buyerModel.getData();
+
+                        order.render({
+                            valid: Object.keys(errors).length === 0,
+                            errors: Object.values(errors).join(", "),
+                            payment: data.payment
+                        });
+                    },
+                    (payment) => {
+                        buyerModel.setPayment(payment);
+
+                        const errors = buyerModel.validate();
+                        const data = buyerModel.getData();
+
+                        order.render({
+                            valid: Object.keys(errors).length === 0,
+                            errors: Object.values(errors).join(", "),
+                            payment: data.payment
+                        });
+                    }
+                );
+
+                modal.render({
+                    content: order.render()
+                });
+            }
+    )
+
+    modal.render({
+        content: basket.render({
             items: cards,
             total: basketModel.getTotal()
-        });
-
-        modal.render({
-            content: renderBasket
-        });
-    }
-);
+        })
+    });
+}
 
 const modal = new Modal(
     ensureElement('#modal-container'),
@@ -95,6 +135,7 @@ async function init() {
     const response = await api.getProducts();
 
     catalogModel.setItems(response.items);
+    console.log(response);
 
     const cards = catalogModel.getItems().map( product => {
         const container = cloneTemplate('#card-catalog');
@@ -135,6 +176,7 @@ async function init() {
         return card.render(product);
         }
     );
+    console.log(cards);
 
     page.render({
         catalog: cards
@@ -144,3 +186,5 @@ async function init() {
 }
 
 init();
+
+console.log("init");

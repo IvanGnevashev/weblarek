@@ -40,7 +40,6 @@ set category(value: string) {
         this._category.classList.add('card__category_other')
         break;
     default: 
-         this._category.classList.add('')
          break;
 }
 }
