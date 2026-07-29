@@ -1,9 +1,8 @@
 import { Component } from "./base/Component";
 
 export interface ICard {
-   _title: string;
-   _price: string;
- 
+    title: string;
+    price: number | null;
 }
 
 export class Card extends Component<ICard> {

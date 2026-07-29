@@ -13,9 +13,10 @@ export class FormOrder extends Form {
     constructor(
         container: HTMLElement,
         onInputChange: (field: string, value: string) => void,
-        onPaymentChange: (payment: TPayment) => void
+        onPaymentChange: (payment: TPayment) => void,
+        onSubmit: () => void
     ) {
-        super(container, onInputChange);
+        super(container, onInputChange, onSubmit);
         this._address = this.container.querySelector('input[name="address"]')! as HTMLInputElement;
         this._cardButton = this.container.querySelector('button[name="card"]')! as HTMLButtonElement;
         this._cashButton = this.container.querySelector('button[name="cash"]')! as HTMLButtonElement;

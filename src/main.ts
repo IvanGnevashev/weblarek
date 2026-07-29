@@ -7,6 +7,7 @@ import { CardPreview } from './components/CardPreview';
 import { IProduct } from './types/index';
 import { Basket } from './components/Basket';
 import { FormOrder } from './components/FormOrder';
+import { FormContacts } from './components/FormContscts';
 
 import { CatalogModel } from './components/Models/CatalogModel';
 import { BasketModel } from './components/Models/BasketModel';
@@ -16,7 +17,7 @@ import { Api } from './components/base/Api';
 import { LarekApi } from './components/api/LarekApi';
 
 import { API_URL } from './utils/constants';
-import { cloneTemplate, ensureElement } from './utils/utils';
+import { cloneTemplate, ensureElement, isEmpty } from './utils/utils';
 import { CardBasket } from './components/CardBasket';
 
 const catalogModel = new CatalogModel();
@@ -63,6 +64,8 @@ function openBasket() {
 
                 const order = new FormOrder(
                     orderContainer,
+
+                    // изменение полей
                     (field, value) => {
                         if (field === 'address') {
                             buyerModel.setAddress(value);
@@ -73,10 +76,12 @@ function openBasket() {
 
                         order.render({
                             valid: Object.keys(errors).length === 0,
-                            errors: Object.values(errors).join(", "),
+                            errors: Object.values(errors).join(', '),
                             payment: data.payment
                         });
                     },
+
+                    // выбор способа оплаты
                     (payment) => {
                         buyerModel.setPayment(payment);
 
@@ -85,8 +90,49 @@ function openBasket() {
 
                         order.render({
                             valid: Object.keys(errors).length === 0,
-                            errors: Object.values(errors).join(", "),
+                            errors: Object.values(errors).join(', '),
                             payment: data.payment
+                        });
+                    },
+
+                    // отправка формы
+                    () => {
+                        const contactsContainer = cloneTemplate('#contacts');
+
+                        const contacts = new FormContacts(
+                            contactsContainer,
+
+                            (field, value) => {
+                                if (field === 'email') {
+                                    buyerModel.setEmail(value);
+                                }
+
+                                if (field === 'phone') {
+                                    buyerModel.setPhone(value);
+                                }
+
+                                const errors = buyerModel.validate();
+
+                                contacts.render({
+                                    valid: Object.keys(errors).length === 0,
+                                    errors: Object.values(errors).join(', ')
+                                });
+                            },
+
+                            () => {
+                                const order = {
+                                    ...buyerModel.getData(),
+                                    items: basketModel.getItems().map(item => item.id),
+                                    total: basketModel.getTotal()
+                                };
+
+                                api.order(order)
+                                    .then()
+                            }
+                        );
+
+                        modal.render({
+                            content: contacts.render()
                         });
                     }
                 );

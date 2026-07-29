@@ -8,8 +8,9 @@ export interface IFormContacts {
 export class FormContacts extends Form {
     constructor(
         container: HTMLElement,
-        onInputChange: (field: string, value: string) => void
+        onInputChange: (field: string, value: string) => void,
+        onSubmit: () => void
     ) {
-        super(container, onInputChange);
+        super(container, onInputChange, onSubmit);
     }
 }

@@ -10,8 +10,9 @@ export class Form extends Component<IForm> {
     protected _errors: HTMLElement;
 
     constructor(
-        container: HTMLElement,
-        onInputChange: (field: string, value: string) => void
+    container: HTMLElement,
+    onInputChange: (field: string, value: string) => void,
+    onSubmit: () => void
     ) {
         super(container);
         this._submit = this.container.querySelector('button[type="submit"]')! as HTMLButtonElement;
@@ -26,6 +27,7 @@ export class Form extends Component<IForm> {
 
         this.container.addEventListener('submit', (event) => {
             event.preventDefault();
+            onSubmit();
         });
     }
 
