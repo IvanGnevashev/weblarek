@@ -17,8 +17,9 @@ import { Api } from './components/base/Api';
 import { LarekApi } from './components/api/LarekApi';
 
 import { API_URL } from './utils/constants';
-import { cloneTemplate, ensureElement, isEmpty } from './utils/utils';
+import { cloneTemplate, ensureElement } from './utils/utils';
 import { CardBasket } from './components/CardBasket';
+import { Success } from './components/Success';
 
 const catalogModel = new CatalogModel();
 const basketModel = new BasketModel();
@@ -72,12 +73,21 @@ function openBasket() {
                         }
 
                         const errors = buyerModel.validate();
-                        const data = buyerModel.getData();
+
+                        const orderErrors = [];
+
+                        if (errors.payment) {
+                            orderErrors.push(errors.payment);
+                        }
+
+                        if (errors.address) {
+                            orderErrors.push(errors.address);
+                        }
 
                         order.render({
-                            valid: Object.keys(errors).length === 0,
-                            errors: Object.values(errors).join(', '),
-                            payment: data.payment
+                            valid: orderErrors.length === 0,
+                            errors: orderErrors.join(', '),
+                            payment: buyerModel.getData().payment ?? undefined
                         });
                     },
 
@@ -86,12 +96,11 @@ function openBasket() {
                         buyerModel.setPayment(payment);
 
                         const errors = buyerModel.validate();
-                        const data = buyerModel.getData();
 
                         order.render({
                             valid: Object.keys(errors).length === 0,
                             errors: Object.values(errors).join(', '),
-                            payment: data.payment
+                            payment: buyerModel.getData().payment ?? undefined
                         });
                     },
 
@@ -113,9 +122,19 @@ function openBasket() {
 
                                 const errors = buyerModel.validate();
 
+                                const contactErrors = [];
+
+                                if (errors.email) {
+                                    contactErrors.push(errors.email);
+                                }
+
+                                if (errors.phone) {
+                                    contactErrors.push(errors.phone);
+                                }
+
                                 contacts.render({
-                                    valid: Object.keys(errors).length === 0,
-                                    errors: Object.values(errors).join(', ')
+                                    valid: contactErrors.length === 0,
+                                    errors: contactErrors.join(', ')
                                 });
                             },
 
@@ -126,8 +145,27 @@ function openBasket() {
                                     total: basketModel.getTotal()
                                 };
 
-                                api.order(order)
-                                    .then()
+                                api.postOrder(order)
+                                    .then((result) => {
+                                        buyerModel.clear();
+                                        basketModel.clear();
+                                        updatePage();
+
+                                        const successContainer = cloneTemplate('#success');
+
+                                        const success = new Success (
+                                            successContainer,
+                                            () => {
+                                                modal.close();
+                                            }
+                                        )
+
+                                        modal.render({
+                                            content: success.render({
+                                                total: result.total
+                                            })
+                                        });
+                                    });
                             }
                         );
 

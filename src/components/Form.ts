@@ -5,7 +5,7 @@ export interface IForm {
     errors: string;
 }
 
-export class Form extends Component<IForm> {
+export class Form<T extends IForm> extends Component<T> {
     protected _submit: HTMLButtonElement;
     protected _errors: HTMLElement;
 

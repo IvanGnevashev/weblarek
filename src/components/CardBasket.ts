@@ -4,7 +4,7 @@ export interface ICardBasket extends ICard{
     index: number;
 }
 
-export class CardBasket extends Card {
+export class CardBasket extends Card<ICardBasket> {
     protected _index: HTMLElement;
     protected _delete: HTMLButtonElement;
 

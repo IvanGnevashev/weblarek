@@ -5,7 +5,7 @@ export interface ICard {
     price: number | null;
 }
 
-export class Card extends Component<ICard> {
+export class Card<T extends ICard> extends Component<T> {
 
     protected _title: HTMLElement;
     protected _price: HTMLElement;

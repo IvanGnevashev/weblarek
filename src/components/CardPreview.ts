@@ -7,7 +7,7 @@ export interface ICardPreview extends ICard {
     button: 'buy' | 'remove' | 'disabled';
 }
 
-export class CardPreview extends Card {
+export class CardPreview extends Card<ICardPreview> {
     protected _image: HTMLImageElement;
     protected _category: HTMLElement;
     protected _description: HTMLElement;

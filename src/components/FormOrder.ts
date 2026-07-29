@@ -1,11 +1,11 @@
-import {Form} from "./Form";
+import {Form, IForm} from "./Form";
 import { TPayment } from "../types";
 
-export interface IFormOrder {
+export interface IFormOrder extends IForm{
     payment: TPayment;
 }
 
-export class FormOrder extends Form {
+export class FormOrder extends Form<IFormOrder> {
     protected _address: HTMLInputElement;
     protected _cardButton: HTMLButtonElement;
     protected _cashButton: HTMLButtonElement;
