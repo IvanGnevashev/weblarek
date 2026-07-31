@@ -32,11 +32,11 @@ export class Modal extends Component<IModal> {
     }
 
     open() {
-        this.container.classList.add('modal__actions');
+        this.container.classList.add('modal_active');
     }
 
     close() {
-        this.container.classList.remove('modal__actions');
+        this.container.classList.remove('modal_active');
     }
 
     render(data: IModal): HTMLElement {

@@ -3,6 +3,7 @@ import { TPayment } from "../types";
 
 export interface IFormOrder extends IForm{
     payment: TPayment;
+    address: string;
 }
 
 export class FormOrder extends Form<IFormOrder> {
@@ -41,5 +42,9 @@ export class FormOrder extends Form<IFormOrder> {
                 this._cashButton.classList.add('button_alt-active');
                 break;
         }
+    }
+
+    set address(value: string) {
+        this._address.value = value;
     }
 }

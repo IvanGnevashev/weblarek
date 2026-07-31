@@ -34,20 +34,7 @@ set image(value: string) {
 }
 
 set category(value: string) {
-    this._category.textContent = value;
-    this._category.classList.remove('card__category_soft');
-    this._category.classList.remove('card__category_other');
-    switch (value) {
-    case 'софт-скил':
-        this._category.classList.add('card__category_soft')
-        break;
-
-    case 'другое':
-        this._category.classList.add('card__category_other')
-        break;
-    default: 
-         break;
-}
+    this.updateCategory(this._category, value);
 }
 
 set description(value: string) {

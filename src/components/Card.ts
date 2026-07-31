@@ -1,4 +1,5 @@
 import { Component } from "./base/Component";
+import { categoryMap } from '../utils/constants';
 
 export interface ICard {
     title: string;
@@ -14,6 +15,19 @@ export class Card<T extends ICard> extends Component<T> {
         super(container);
         this._title = this.container.querySelector('.card__title')! as HTMLElement;
         this._price = this.container.querySelector('.card__price')! as HTMLElement;
+    }
+
+    protected updateCategory(element: HTMLElement, value: string) {
+        element.textContent = value;
+
+        element.classList.remove(...Object.values(categoryMap));
+
+        const categoryClass =
+            categoryMap[value as keyof typeof categoryMap];
+
+        if (categoryClass) {
+            element.classList.add(categoryClass);
+        }
     }
 
     set title(value: string) { 
