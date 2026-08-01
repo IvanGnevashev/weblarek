@@ -1,4 +1,5 @@
-import { IProduct } from "../../types";
+import { IProduct } from '../../types';
+import { IEvents } from '../base/Events';
 
 export class BasketModel {
     protected _items: IProduct[] = [];
