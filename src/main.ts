@@ -53,6 +53,13 @@ const modal = new Modal(
     }
 );
 
+const preview = new CardPreview(
+    cloneTemplate('#card-preview'),
+    () => {
+        events.emit('preview:action');
+    }
+);
+
 // События каталога
 
 events.on('catalog:changed', () => {
@@ -66,10 +73,7 @@ events.on('catalog:changed', () => {
             }
         );
 
-        return card.render({
-            ...product,
-            image: CDN_URL + product.image
-        });
+        return card.render(product);
     });
 
     page.catalog = cards;
@@ -96,50 +100,45 @@ events.on('preview:changed', () => {
         return;
     }
 
-    let buttonState: 'buy' | 'remove' | 'disabled';
+    let buttonText: string;
+    let buttonDisabled: boolean;
 
     if (product.price === null) {
-        buttonState = 'disabled';
+        buttonText = 'Недоступно';
+        buttonDisabled = true;
     } else if (basketModel.hasItem(product.id)) {
-        buttonState = 'remove';
+        buttonText = 'Удалить из корзины';
+        buttonDisabled = false;
     } else {
-        buttonState = 'buy';
+        buttonText = 'Купить';
+        buttonDisabled = false;
     }
-
-    const preview = new CardPreview(
-        cloneTemplate('#card-preview'),
-        () => {
-            events.emit('preview:action', {
-                id: product.id
-            });
-        }
-    );
 
     modal.render({
         content: preview.render({
             ...product,
-            image: CDN_URL + product.image,
-            button: buttonState
+            buttonText,
+            buttonDisabled
         })
     });
 });
 
 // Добавление или удаление товара через превью
 
-events.on<{ id: string }>('preview:action', ({ id }) => {
-    const product = catalogModel.getItem(id);
+events.on('preview:action', () => {
+    const product = catalogModel.getPreview();
 
     if (!product || product.price === null) {
         return;
     }
 
-    if (basketModel.hasItem(id)) {
-        basketModel.removeItem(id);
+    if (basketModel.hasItem(product.id)) {
+        basketModel.removeItem(product.id);
     } else {
         basketModel.addItem(product);
     }
 
-    events.emit('modal:close');
+    modal.close();
 });
 
 // Обновление интерфейса после изменения корзины
@@ -330,12 +329,6 @@ events.on<{ payment: TPayment }>(
 // Переход ко второму этапу заказа
 
 events.on('order:submit', () => {
-    const orderErrors = getOrderErrors();
-
-    if (orderErrors.length > 0) {
-        return;
-    }
-
     modal.render({
         content: renderContacts()
     });
@@ -359,16 +352,7 @@ events.on<{ field: string; value: string }>(
 // Отправка заказа
 
 events.on('contacts:submit', async () => {
-    const validationErrors = buyerModel.validate();
     const buyerData = buyerModel.getData();
-
-    if (
-        Object.keys(validationErrors).length > 0 ||
-        !buyerData.payment ||
-        basketModel.getCount() === 0
-    ) {
-        return;
-    }
 
     contacts.render({
         valid: false,
@@ -383,14 +367,20 @@ events.on('contacts:submit', async () => {
             total: basketModel.getTotal()
         });
 
-        events.emit('order:success', {
-            total: result.total
+        basketModel.clear();
+        buyerModel.clear();
+
+        modal.render({
+            content: success.render({
+                total: result.total
+            })
         });
     } catch (error) {
         console.error('Не удалось оформить заказ:', error);
 
-        events.emit('order:error', {
-            message: 'Не удалось оформить заказ. Попробуйте ещё раз.'
+        contacts.render({
+            valid: true,
+            errors: 'Не удалось оформить заказ. Попробуйте ещё раз.'
         });
     }
 });
@@ -415,42 +405,25 @@ events.on('buyer:changed', () => {
     });
 });
 
-// Успешное оформление заказа
-
-events.on<{ total: number }>('order:success', ({ total }) => {
-    basketModel.clear();
-    buyerModel.clear();
-
-    modal.render({
-        content: success.render({
-            total
-        })
-    });
-});
-
-// Ошибка оформления заказа
-
-events.on<{ message: string }>('order:error', ({ message }) => {
-    contacts.render({
-        valid: getContactErrors().length === 0,
-        errors: message
-    });
-});
-
 // Первоначальная загрузка данных
 
 async function init() {
     try {
         const response = await api.getProducts();
 
-        catalogModel.setItems(response.items);
+        const products = response.items.map((product) => ({
+            ...product,
+            image: CDN_URL + product.image
+        }));
+
+        catalogModel.setItems(products);
 
         console.log(
             '[Каталог, сохранённый в CatalogModel]',
             catalogModel.getItems()
         );
 
-        testModels(response.items);
+        testModels(products);
     } catch (error) {
         console.error('Не удалось загрузить каталог:', error);
     }

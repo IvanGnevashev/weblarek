@@ -288,7 +288,9 @@ type IValidationErrors = Partial<Record<keyof IBuyer, string>>;
 Методы класса:
 - `set title(value: string): void` — устанавливает название товара.
 - `set price(value: number | null): void` — устанавливает цену товара. Если цена равна `null`, отображает текст «Бесценно».
-- `updateCategory(element: HTMLElement, value: string): void` — защищённый метод, который устанавливает текст категории, удаляет предыдущий CSS-класс и добавляет новый класс из `categoryMap`.
+
+Вспомогательная функция:
+- `setCategory(element: HTMLElement, value: string): void` — устанавливает название категории, удаляет предыдущий CSS-класс категории и добавляет соответствующий класс из `categoryMap`. Функция используется только в `CardCatalog` и `CardPreview`. Вынесенна в `Card` чтобы не дублировать логику.
 
 #### Класс Form
 
@@ -344,7 +346,7 @@ type IValidationErrors = Partial<Record<keyof IBuyer, string>>;
 
 #### Класс CardPreview
 
-Отвечает за подробное отображение выбранного товара в модальном окне. Наследует класс `Card`.
+Отвечает за подробное отображение выбранного товара в модальном окне. Наследует класс `Card`. Один экземпляр `CardPreview` создаётся при загрузке приложения и повторно используется для отображения разных товаров.
 
 Конструктор:
 `constructor(container: HTMLElement, onButtonClick: () => void)` — принимает DOM-элемент карточки и callback нажатия на основную кнопку.
@@ -359,7 +361,8 @@ type IValidationErrors = Partial<Record<keyof IBuyer, string>>;
 - `set image(value: string): void` — устанавливает изображение товара.
 - `set category(value: string): void` — устанавливает название категории и соответствующий ей CSS-класс.
 - `set description(value: string): void` — устанавливает описание товара.
-- `set button(value: 'buy' | 'remove' | 'disabled'): void` — изменяет текст и состояние кнопки в зависимости от доступности товара и наличия товара в корзине.
+- `set buttonText(value: string): void` — устанавливает готовый текст кнопки.
+- `set buttonDisabled(value: boolean): void` — включает или блокирует кнопку.
 - обработчик клика по кнопке вызывает переданный callback.
 
 #### Класс CardBasket
@@ -471,7 +474,7 @@ type IValidationErrors = Partial<Record<keyof IBuyer, string>>;
 | Событие | Инициатор | Данные | Назначение |
 |---|---|---|---|
 | `card:select` | `CardCatalog` | `{ id: string }` | Выбор товара для подробного просмотра |
-| `preview:action` | `CardPreview` | `{ id: string }` | Добавление товара в корзину или удаление из неё |
+| `preview:action` | `CardPreview` | — | Добавление выбранного товара в корзину или удаление из неё |
 | `basket:open` | `Page` | — | Открытие корзины |
 | `basket:remove` | `CardBasket` | `{ id: string }` | Удаление товара из корзины |
 | `order:open` | `Basket` | — | Открытие первого этапа заказа |
@@ -480,7 +483,7 @@ type IValidationErrors = Partial<Record<keyof IBuyer, string>>;
 | `order:submit` | `FormOrder` | — | Переход к форме контактов |
 | `contacts:input` | `FormContacts` | `{ field: string, value: string }` | Изменение email или телефона |
 | `contacts:submit` | `FormContacts` | — | Отправка заказа |
-| `modal:close` | `Modal`, `Success`, Презентер | — | Закрытие модального окна |
+| `modal:close` | `Modal`, `Success` | — | Закрытие модального окна |
 
 ### События моделей данных
 
@@ -491,18 +494,13 @@ type IValidationErrors = Partial<Record<keyof IBuyer, string>>;
 | `basket:changed` | `BasketModel` | — | После добавления, удаления или очистки товаров |
 | `buyer:changed` | `BuyerModel` | — | После изменения или очистки данных покупателя |
 
-### События оформления заказа
-
-| Событие | Инициатор | Данные | Назначение |
-|---|---|---|---|
-| `order:success` | Презентер после ответа API | `{ total: number }` | Очистка моделей и отображение `Success` |
-| `order:error` | Презентер после ошибки API | `{ message: string }` | Вывод ошибки в `FormContacts` |
-
 ### Основные последовательности событий
 
 Загрузка каталога:
 
 API
+  получение каталога
+  добавление CDN_URL к путям изображений в Презентере
   CatalogModel.setItems()
   catalog:changed
   отображение карточек в Page
@@ -540,4 +538,5 @@ FormContacts
 FormContacts
   contacts:submit
   отправка данных через LarekApi
-  order:success или order:error
+  при успешном ответе Презентер очищает модели и отображает Success
+  при ошибке Презентер выводит сообщение в FormContacts

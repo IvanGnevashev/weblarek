@@ -6,8 +6,23 @@ export interface ICard {
     price: number | null;
 }
 
-export class Card<T extends ICard> extends Component<T> {
+export function setCategory(
+    element: HTMLElement,
+    value: string
+): void {
+    element.textContent = value;
 
+    element.classList.remove(...Object.values(categoryMap));
+
+    const categoryClass =
+        categoryMap[value as keyof typeof categoryMap];
+
+    if (categoryClass) {
+        element.classList.add(categoryClass);
+    }
+}
+
+export class Card<T extends ICard> extends Component<T> {
     protected _title: HTMLElement;
     protected _price: HTMLElement;
 
@@ -15,19 +30,6 @@ export class Card<T extends ICard> extends Component<T> {
         super(container);
         this._title = this.container.querySelector('.card__title')! as HTMLElement;
         this._price = this.container.querySelector('.card__price')! as HTMLElement;
-    }
-
-    protected updateCategory(element: HTMLElement, value: string) {
-        element.textContent = value;
-
-        element.classList.remove(...Object.values(categoryMap));
-
-        const categoryClass =
-            categoryMap[value as keyof typeof categoryMap];
-
-        if (categoryClass) {
-            element.classList.add(categoryClass);
-        }
     }
 
     set title(value: string) { 

@@ -1,10 +1,11 @@
-import {Card, ICard} from "./Card"
+import { Card, ICard, setCategory } from './Card';
 
 export interface ICardPreview extends ICard {
     image: string;
     category: string;
     description: string;
-    button: 'buy' | 'remove' | 'disabled';
+    buttonText: string;
+    buttonDisabled: boolean;
 }
 
 export class CardPreview extends Card<ICardPreview> {
@@ -34,29 +35,10 @@ set image(value: string) {
 }
 
 set category(value: string) {
-    this.updateCategory(this._category, value);
+    setCategory(this._category, value);
 }
 
 set description(value: string) {
     this._description.textContent = value;
-}
-
-set button(value: 'buy' | 'remove' | 'disabled') {
-    switch (value) {
-        case 'buy':
-            this._button.textContent = "Купить";
-            this._button.disabled = false;
-            break;
-
-        case 'remove':
-            this._button.textContent = "Удалить из корзины";
-            this._button.disabled = false;
-            break;
-
-        case 'disabled':
-            this._button.textContent = 'Недоступно';
-            this._button.disabled = true;
-            break;
-    }
 }
 }

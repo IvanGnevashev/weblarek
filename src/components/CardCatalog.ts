@@ -1,4 +1,4 @@
-import {Card, ICard} from "./Card"
+import { Card, ICard, setCategory } from './Card';
 
 export interface ICardCatalog extends ICard {
     image: string;
@@ -28,6 +28,6 @@ set image(value: string) {
 }
 
 set category(value: string) {
-    this.updateCategory(this._category, value);
+    setCategory(this._category, value);
 }
 }
