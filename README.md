@@ -316,17 +316,19 @@ type IValidationErrors = Partial<Record<keyof IBuyer, string>>;
 Отвечает за отображение модального окна и замену его содержимого. Наследует класс `Component`.
 
 Конструктор:
-`constructor(container: HTMLElement, onClose: () => void)` — принимает DOM-элемент модального окна и callback его закрытия.
+`constructor(container: HTMLElement, events: IEvents)` — принимает DOM-элемент модального окна и брокер событий.
 
 Поля класса:
 - `_close: HTMLButtonElement` — кнопка закрытия модального окна.
 - `_content: HTMLElement` — контейнер содержимого модального окна.
+- `events: IEvents` — брокер событий, используемый для сообщения об открытии и закрытии модального окна.
 
 Методы класса:
 - `set content(value: HTMLElement): void` — заменяет содержимое модального окна.
-- `open(): void` — открывает модальное окно.
-- `close(): void` — закрывает модальное окно.
+- `open(): void` — открывает модальное окно и генерирует событие `modal:open`.
+- `close(): void` — закрывает модальное окно и генерирует событие `modal:close`.
 - `render(data: IModal): HTMLElement` — устанавливает содержимое и открывает модальное окно.
+- обработчики клика по крестику и фону напрямую вызывают метод `close()`.
 
 #### Класс CardCatalog
 
@@ -442,11 +444,11 @@ type IValidationErrors = Partial<Record<keyof IBuyer, string>>;
 
 Методы класса:
 - `set total(value: number): void` — отображает сумму оформленного заказа.
-- обработчик клика по кнопке вызывает callback закрытия.
+- обработчик клика по кнопке вызывает переданный callback, который генерирует событие `success:close`.
 
 #### Класс Page
 
-Отвечает за отображение каталога товаров и счётчика корзины на главной странице. Наследует класс `Component`.
+Отвечает за отображение каталога товаров, счётчика корзины и управление прокруткой главной страницы. Наследует класс `Component`.
 
 Конструктор:
 `constructor(container: HTMLElement, onBasketClick: () => void)` — принимает DOM-элемент страницы и callback открытия корзины.
@@ -455,6 +457,8 @@ type IValidationErrors = Partial<Record<keyof IBuyer, string>>;
 - `_gallery: HTMLElement` — контейнер карточек каталога.
 - `_basketButton: HTMLButtonElement` — кнопка открытия корзины.
 - `_counter: HTMLElement` — счётчик товаров в корзине.
+- `lockScroll(): void` — блокирует прокрутку страницы при открытом модальном окне.
+- `unlockScroll(): void` — восстанавливает прокрутку страницы после закрытия модального окна.
 
 Методы класса:
 - `set catalog(value: HTMLElement[]): void` — отображает карточки товаров в каталоге.
@@ -467,7 +471,7 @@ type IValidationErrors = Partial<Record<keyof IBuyer, string>>;
 
 Классы представления вызывают переданные через конструктор callback-функции. Эти callback-функции генерируют события о действиях пользователя. Презентер обрабатывает события, вызывает методы моделей и обновляет представление.
 
-Модели самостоятельно генерируют события после изменения своих данных.
+Модели самостоятельно генерируют события после изменения своих данных. Класс `Modal` генерирует события после открытия и закрытия модального окна.
 
 ### События действий пользователя
 
@@ -483,7 +487,14 @@ type IValidationErrors = Partial<Record<keyof IBuyer, string>>;
 | `order:submit` | `FormOrder` | — | Переход к форме контактов |
 | `contacts:input` | `FormContacts` | `{ field: string, value: string }` | Изменение email или телефона |
 | `contacts:submit` | `FormContacts` | — | Отправка заказа |
-| `modal:close` | `Modal`, `Success` | — | Закрытие модального окна |
+| `success:close` | `Success` | — | Нажатие на кнопку закрытия сообщения об успешном заказе |
+
+### События представления
+
+| Событие | Инициатор | Данные | Когда генерируется |
+|---|---|---|---|
+| `modal:open` | `Modal` | — | После открытия модального окна |
+| `modal:close` | `Modal` | — | После закрытия модального окна |
 
 ### События моделей данных
 
@@ -540,3 +551,21 @@ FormContacts
   отправка данных через LarekApi
   при успешном ответе Презентер очищает модели и отображает Success
   при ошибке Презентер выводит сообщение в FormContacts
+
+Открытие и закрытие модального окна:
+
+Modal.open()
+  modal:open
+  Page.lockScroll()
+
+Modal.close()
+  modal:close
+  Page.unlockScroll()
+
+Закрытие сообщения об успешном заказе:
+
+Success
+  success:close
+  Modal.close()
+  modal:close
+  Page.unlockScroll()

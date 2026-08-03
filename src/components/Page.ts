@@ -12,10 +12,10 @@ export class Page extends Component<IPage> {
 
 
     constructor(container: HTMLElement, onBasketClick: () => void) {
-        super(container)
-        this._gallery = this.container.querySelector('.gallery')! as HTMLElement
-        this._counter = this.container.querySelector('.header__basket-counter')! as HTMLElement
-        this._basketButton = this.container.querySelector('.header__basket')! as HTMLButtonElement
+        super(container);
+        this._gallery = this.container.querySelector('.gallery')! as HTMLElement;
+        this._counter = this.container.querySelector('.header__basket-counter')! as HTMLElement;
+        this._basketButton = this.container.querySelector('.header__basket')! as HTMLButtonElement;
         this._basketButton.addEventListener('click', (): void => { onBasketClick(); });
     }
 
@@ -25,5 +25,13 @@ export class Page extends Component<IPage> {
 
     set catalog(items: HTMLElement[]) {
         this._gallery.replaceChildren(...items);
+    }
+
+    lockScroll(): void {
+        document.body.style.overflow = 'hidden';
+    }
+
+    unlockScroll(): void {
+        document.body.style.overflow = '';
     }
 }

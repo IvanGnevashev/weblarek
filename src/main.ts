@@ -48,9 +48,7 @@ const page = new Page(
 
 const modal = new Modal(
     ensureElement('#modal-container'),
-    () => {
-        events.emit('modal:close');
-    }
+    events
 );
 
 const preview = new CardPreview(
@@ -197,7 +195,7 @@ const contacts = new FormContacts(
 const success = new Success(
     cloneTemplate('#success'),
     () => {
-        events.emit('modal:close');
+        events.emit('success:close');
     }
 );
 
@@ -288,7 +286,15 @@ events.on('basket:open', () => {
 
 // Закрытие модального окна
 
+events.on('modal:open', () => {
+    page.lockScroll();
+});
+
 events.on('modal:close', () => {
+    page.unlockScroll();
+});
+
+events.on('success:close', () => {
     modal.close();
 });
 
@@ -395,11 +401,14 @@ events.on('buyer:changed', () => {
 
     order.render({
         payment: buyerData.payment ?? undefined,
+        address: buyerData.address,
         valid: orderErrors.length === 0,
         errors: orderErrors.join(', ')
     });
 
     contacts.render({
+        email: buyerData.email,
+        phone: buyerData.phone,
         valid: contactErrors.length === 0,
         errors: contactErrors.join(', ')
     });
